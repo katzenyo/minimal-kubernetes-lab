@@ -18,7 +18,7 @@ resource "aws_vpc_security_group_egress_rule" "kube-training-private-outbound" {
 
 ### Launch Template Configuration
 
-resource "aws_launch_template" "app" {
+resource "aws_launch_template" "worker-node" {
   name_prefix = "kube-worker-node-"
   image_id = data.aws_ssm_parameter.al2023_gp3_ami.value
   instance_type = "t3.micro"
@@ -27,13 +27,12 @@ resource "aws_launch_template" "app" {
     name = aws_iam_instance_profile.ec2_profile.name
   }
 
-  vpc_security_group_ids = [ var.sg_app_id ]
+  vpc_security_group_ids = [ aws_security_group.kube-training-private.id ]
 
   user_data = base64encode(<<-EOF
     #!/bin/bash
-    yum install -y httpd
-    echo "hello world! this is my dev plan app tier $(hostname)" > /var/www/html/index.html
-    systemctl enable --now httpd
+    systemctl enable amazon-ssm-agent
+    systemctl start amazon-ssm-agent
   EOF
   )
 
@@ -42,7 +41,26 @@ resource "aws_launch_template" "app" {
   }
 }
 
-### IAM configuration
+resource "aws_launch_template" "control-plane" {
+  name_prefix = "kube-control-plane-"
+  image_id = data.aws_ssm_parameter.al2023_gp3_ami.value
+  instance_type = "t3.small"
+
+  iam_instance_profile {
+    name = aws_iam_instance_profile.ec2_profile.name
+  }
+
+  vpc_security_group_ids = [ aws_security_group.kube-training-private.id ]
+
+  user_data = base64encode(<<-EOF
+    #!/bin/bash
+    systemctl enable amazon-ssm-agent
+    systemctl start amazon-ssm-agent
+  EOF
+  )
+}
+
+### IAM instance trust policy configuration
 
 data "aws_iam_policy_document" "ec2_assume_role" {
   statement {
