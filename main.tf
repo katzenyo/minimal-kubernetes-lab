@@ -9,7 +9,7 @@ terraform {
 
 provider "aws" {
   region = var.us_aws_region
-  profile = "kiplet-dev"
+  profile = "admin"
   
 
   default_tags {
@@ -28,5 +28,5 @@ module "vpc" {
 module "compute" {
   source = "./compute/"
   vpc_id = module.vpc.vpc_id
-  private_subnet_id = module.vpc.private_subnet
+  private_subnet_id = module.vpc.private_subnet_id
 }
