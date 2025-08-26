@@ -73,24 +73,24 @@ resource "aws_launch_template" "worker-node" {
 
 ### Initial server config
 
-resource "aws_ssm_document" "k8s_training_config" {
-  name          = "K8sTrainingConfiguration"
-  document_type = "Command"
-  document_format = "YAML"
+# resource "aws_ssm_document" "k8s_training_config" {
+#   name          = "K8sTrainingConfiguration"
+#   document_type = "Command"
+#   document_format = "YAML"
 
-  content = <<DOC
-schemaVersion: '2.2'
-description: Configure K8s training environment
-mainSteps:
-  - action: aws:runShellScript
-    name: configureK8sServer
-    inputs:
-      runCommand:
-        - yum update -y
-        - systemctl start httpd
-        - systemctl enable httpd
-DOC
-}
+#   content = <<DOC
+# schemaVersion: '2.2'
+# description: Configure K8s training environment
+# mainSteps:
+#   - action: aws:runShellScript
+#     name: configureK8sServer
+#     inputs:
+#       runCommand:
+#         - yum update -y
+#         - systemctl start httpd
+#         - systemctl enable httpd
+# DOC
+# }
 
 # Association to run on all instances with specific tag
 resource "aws_ssm_association" "web_config" {
@@ -155,7 +155,7 @@ resource "aws_iam_instance_profile" "ec2_profile" {
   role = aws_iam_role.ec2_role.name
 }
 
-resource "aws_iam_role_policy_attachment" "ssm_readonly" {
-  role = aws_iam_role.ec2_role.name
-  policy_arn = "arn:aws:iam::aws:policy/AmazonSSMReadOnlyAccess"
-}
+# resource "aws_iam_role_policy_attachment" "ssm_readonly" {
+#   role = aws_iam_role.ec2_role.name
+#   policy_arn = "arn:aws:iam::aws:policy/AmazonSSMReadOnlyAccess"
+# }
