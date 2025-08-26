@@ -45,6 +45,9 @@ resource "aws_launch_template" "control-plane" {
 
   tag_specifications {
     resource_type = "instance"
+    tags = {
+      Name = "training-control-plane"
+    }
   }
 }
 
@@ -68,6 +71,9 @@ resource "aws_launch_template" "worker-node" {
 
   tag_specifications {
     resource_type = "instance"
+    tags = {
+      Name = "worker-node"
+    }
   }
 }
 
@@ -110,6 +116,10 @@ resource "aws_instance" "k8s_control_plane" {
   launch_template {
     id = aws_launch_template.control-plane.id
     version = "$Latest"
+  }
+
+  tags = {
+    Name = "k8s-control-plane"
   }
 }
 
