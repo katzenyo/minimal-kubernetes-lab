@@ -20,6 +20,16 @@ resource "aws_vpc_security_group_ingress_rule" "kube-training-ingress" {
   security_group_id = aws_security_group.kube-training-private.id
   referenced_security_group_id = aws_security_group.kube-training-private.id
   ip_protocol = "-1"
+  description = "Allows internal communication only"
+}
+
+resource "aws_vpc_security_group_ingress_rule" "allow-jason-ingress" {
+  security_group_id = aws_security_group.kube-training-private.id
+  cidr_ipv4 = "142.115.102.46/32"
+  ip_protocol = "tcp"
+  from_port = 80
+  to_port = 31711
+  description = "Allows my IP through"
 }
 
 ### Launch Template Configuration
@@ -120,6 +130,20 @@ resource "aws_instance" "k8s_control_plane" {
 
   tags = {
     Name = "k8s-control-plane"
+  }
+}
+
+resource "aws_instance" "k8s_ha_cp" {
+  subnet_id = var.private_subnet_id
+  count = 0
+
+  launch_template {
+    id = aws_launch_template.control-plane.id
+    version = "$Latest"
+  }
+
+  tags = {
+    Name = "k8s-high-availability-cp-${count.index + 1}"
   }
 }
 
